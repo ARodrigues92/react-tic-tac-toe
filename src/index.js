@@ -98,10 +98,13 @@ class Game extends React.Component {
       const coordMsg = step.playLocation
         ? 'Move coordinates (col-row): ' + step.playLocation
         : '';
+      const className = move === history.length - 1 ? 'bold' : '';
       return (
         <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
-          <p>{coordMsg}</p>
+          <button className={className} onClick={() => this.jumpTo(move)}>
+            {desc}
+          </button>
+          <p className={className}>{coordMsg}</p>
         </li>
       );
     });
