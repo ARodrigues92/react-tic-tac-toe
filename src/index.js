@@ -2,6 +2,85 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
+function SortButton(props) {
+  return (
+    <button className="sort" onClick={props.onClick}>
+      {props.value}
+    </button>
+  );
+}
+
+function ReverseButton(props) {
+  return (
+    <button className={props.className} onClick={props.onGoToClick}>
+      {props.desc}
+    </button>
+  );
+}
+
+function Cooredinates(props) {
+  return <p className={props.className}>{props.coordMsg}</p>;
+}
+
+function GameHistory(props) {
+  let moves = props.history.map((step, move) => {
+    const desc = move ? 'Go to move #' + move : 'Go to game start';
+    const coordMsg = step.playLocation
+      ? 'Move coordinates (col-row): ' + step.playLocation
+      : '';
+    const className = move === props.history.length - 1 ? 'bold' : '';
+    return (
+      <li key={move}>
+        <ReverseButton
+          className={className}
+          desc={desc}
+          onGoToClick={() => props.onGoToClick(move)}
+        />
+        <Cooredinates className={className} coordMsg={coordMsg} />
+      </li>
+    );
+  });
+  if (!props.isAscending) {
+    moves = moves.reverse();
+  }
+  return <ul>{moves}</ul>;
+}
+
+class GameData extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isAscending: true,
+    };
+  }
+
+  handleClick() {
+    this.setState({
+      isAscending: this.state.isAscending ? false : true,
+    });
+  }
+
+  render() {
+    const buttonMsg = this.state.isAscending
+      ? 'Sort last to first'
+      : 'Sort first to last';
+    return (
+      <div>
+        <div>
+          <SortButton value={buttonMsg} onClick={() => this.handleClick()} />
+        </div>
+        <div>
+          <GameHistory
+            history={this.props.gameHistory}
+            isAscending={this.state.isAscending}
+            onGoToClick={(move) => this.props.onGoToClick(move)}
+          />
+        </div>
+      </div>
+    );
+  }
+}
+
 function Square(props) {
   return (
     <button className="square" onClick={props.onClick}>
@@ -97,22 +176,6 @@ class Game extends React.Component {
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
 
-    const moves = history.map((step, move) => {
-      const desc = move ? 'Go to move #' + move : 'Go to game start';
-      const coordMsg = step.playLocation
-        ? 'Move coordinates (col-row): ' + step.playLocation
-        : '';
-      const className = move === history.length - 1 ? 'bold' : '';
-      return (
-        <li key={move}>
-          <button className={className} onClick={() => this.jumpTo(move)}>
-            {desc}
-          </button>
-          <p className={className}>{coordMsg}</p>
-        </li>
-      );
-    });
-
     let status;
     if (winner) {
       status = 'Winner: ' + winner;
@@ -130,7 +193,10 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol>{moves}</ol>
+          <GameData
+            gameHistory={history}
+            onGoToClick={(move) => this.jumpTo(move)}
+          />
         </div>
       </div>
     );
