@@ -53,3 +53,7 @@ ul {
 .bold {
   font-weight: bold;
 }
+
+.winner {
+  background-color: green;
+}
